@@ -131,6 +131,16 @@ def bfunc(i,j,fw,fh,image,sigma1, sigma2, bilateralWFilter):
     bilateralFilter = bilateralFilter/np.sum(bilateralFilter,axis=(0,1))
     return np.sum(np.multiply(imgwork, bilateralFilter),axis=(0,1))
 
+def gfunc(x,y,sigma):
+    return (math.exp(-(x**2 + y**2)/(2*(sigma**2))))/(2*3.14*(sigma**2))
+    
+def gaussFilter(size, sigma):
+    out = np.zeros(size)
+    for i in range(size[0]):
+        for j in range(size[1]):
+            out[i,j] = gfunc(i-size[0]//2,j-size[1]//2, sigma )
+    return out/np.sum(out)
+    
 def bilateralFilterConv(image, fw,fh):
     size = image.shape
     sigma1 = 40
@@ -166,13 +176,13 @@ def interpolate(image):
     iw, ih, id = image.shape
     out = np.zeros((2*iw, 2*ih, id), dtype=np.uint8)
     for d in range(id):
-        for i in range(ih):
-            for j in range(iw):
+        for j in range(ih):
+            for i in range(iw):
                 out[2*i,2*j,d] = image[i,j,d]
 
     for d in range(id):
-        for i in range(2*ih):
-            for j in range(2*iw):
+        for j in range(2*ih):
+            for i in range(2*iw):
                 if (i%2 == 0 and j%2 == 0) or np.count_nonzero(out[i-1:i+2,j-1:j+2,d]) == 0:
                     continue
                 out[i, j, d] = np.sum(out[i-1:i+2,j-1:j+2,d])//np.count_nonzero(out[i-1:i+2,j-1:j+2,d] != 0)
